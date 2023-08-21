@@ -144,15 +144,18 @@ class BulkBase:
                         rows.append(row)
 
         # Sort by date
+        print("Sorting rows")
         rows.sort(key=lambda x: x[0])
         # Remove duplicates (optional)
         new_rows = []
+        print("Removing duplicates")
         for row in rows:
             if row not in new_rows:
                 new_rows.append(row)
         rows = new_rows
 
         # Write to the output CSV file
+        print("Writing to output file")
         with open(output, "w", newline="") as csvfile:
             csvwriter = csv.writer(csvfile, delimiter=",", quotechar="'")
             

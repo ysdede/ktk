@@ -2,7 +2,7 @@ from BulkBase import BulkBase
 
 if __name__ == "__main__":
     binanceDownloader = BulkBase(
-        start="2021-11-01",
+        start="2023-06-01",
         end="2023-08-18",
         market_type="futures",
         margin_type="um",
