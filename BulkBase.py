@@ -18,11 +18,11 @@ class BulkBase:
         start: str,
         end: str,
         symbol: str,
-        tf: str = "1m",
+        tf: str = "1h",
         market_type: str = "futures",
         margin_type: str = "um",
         data_type: str = "klines",
-        worker_count: int = 4,
+        worker_count: int = 10,
         force_daily: bool = False,
         merge: bool = False,
     ) -> None:
@@ -38,6 +38,7 @@ class BulkBase:
             data_type (str, optional): Spot: aggTrades, klines, trades
                                         Futures: aggTrades, indexPriceKlines, klines, markPriceKlines,  premiumIndexKlines, trades]. Defaults to 'klines'.
             worker_count (int, optional): Number of download jobs to run paralel. Defaults to 4.
+            force_daily (bool, optional): Force daily data. Defaults to False.
         """
 
         self.timer_start = timer()
@@ -60,9 +61,6 @@ class BulkBase:
         self.period = "monthly"  # monthly, daily
         self.base_url = "https://data.binance.vision/data/"
 
-        # not tested on *nix & darwin
-        # temp_dir = Path("/tmp" if platform.system() == "Darwin" else tempfile.gettempdir())
-        # print('\033[1m', '\033[37m', 'temp_dir', temp_dir, '\033[0m')
         self.base_folder = "storage/"  # f'{str(temp_dir)}/bulkdata/'
         os.makedirs(self.base_folder, exist_ok=True)
         print("\033[1m", "\033[37m", "base_folder:", self.base_folder, "\033[0m")
@@ -95,31 +93,6 @@ class BulkBase:
         all_csv.sort()
         return all_csv
 
-    # def merge_csv(self, file_list, output):
-    #     import pandas as pd
-
-    #     dfs = []
-    #     names = None
-    #     if self.data_type == 'klines':
-    #         names = ['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 'quote_volume',
-    #                  'count', 'taker_buy_volume', 'taker_buy_quote_volume', 'ignore']
-
-    #     # open_time	open	high	low	close	volume	close_time	quote_volume	count	taker_buy_volume	taker_buy_quote_volume	ignore
-
-    #     for file_name in file_list:
-    #         print("Reading file:", file_name)
-    #         if self.data_type == 'klines':
-    #             df = pd.read_csv(file_name, names=names, index_col=0)
-    #         else:
-    #             df = pd.read_csv(file_name, index_col=0)
-    #         print("Columns:", df.columns)  # Print column names for debugging
-    #         print(df.head(5))  # Print first 5 rows for debugging
-    #         dfs.append(df)
-
-    #     combined_df = pd.concat(dfs, ignore_index=True)
-    #     combined_df.drop_duplicates(inplace=True)
-    #     combined_df.sort_values(by=combined_df.columns[0], inplace=True)
-    #     combined_df.to_csv(output, index=False)
 
     def merge_csv(self, file_list, output):
         import csv
@@ -138,7 +111,7 @@ class BulkBase:
                 for row in csvreader:
                     # Detect header based on the first cell's content, if it's a string andcontains "time" then it's a header
                     if isinstance(row[0], str) and "time" in row[0]:
-                        print("Header found")
+                        # print("Header found")
                         header = row
                     else:
                         rows.append(row)
@@ -148,11 +121,11 @@ class BulkBase:
         rows.sort(key=lambda x: x[0])
         # Remove duplicates (optional)
         new_rows = []
-        print("Removing duplicates")
-        for row in rows:
-            if row not in new_rows:
-                new_rows.append(row)
-        rows = new_rows
+        # print("Removing duplicates")
+        # for row in rows:
+        #     if row not in new_rows:
+        #         new_rows.append(row)
+        # rows = new_rows
 
         # Write to the output CSV file
         print("Writing to output file")
@@ -192,10 +165,9 @@ class BulkBase:
         days_urls, days_checksum_urls = self.make_urls(days)
         self.spawn_downloaders(days_urls)
 
-        print(self.csv_files_in_folder())
+        # print(self.csv_files_in_folder())
 
         output = self.get_output_filename()
-        # print in blue
         print("\033[94m", "Merging files to", output, "\033[0m")
 
         self.merge_csv(self.csv_files_in_folder(), output)
