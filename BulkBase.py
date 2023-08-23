@@ -8,9 +8,8 @@ from pathlib import Path
 from timeit import default_timer as timer
 from urllib.request import urlopen
 from zipfile import ZipFile
-
 import arrow
-
+from datetime import datetime
 
 class BulkBase:
     def __init__(
@@ -44,6 +43,8 @@ class BulkBase:
         self.timer_start = timer()
         # convert start to datetime object with UTC timezone
         self.start = arrow.get(start).to("UTC")
+        if end.lower() == "today":
+            end = datetime.now().date().strftime("%Y-%m-%d")
         self.end = arrow.get(end).to("UTC")
         self.symbol = symbol
         self.sym = None
