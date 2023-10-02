@@ -5,6 +5,7 @@ if __name__ == "__main__":
         start="2019-01-01",
         end="today",
         market_type="futures",
+        margin_type="um",
         worker_count=10,
         data_type="klines",
         symbol="BTC-BUSD",
